@@ -1,4 +1,4 @@
-package com.prefulandia.ms_pagos.model;
+package com.perfulandia.ms_pagos.model;
 
 public enum EstadoFactura {
 
