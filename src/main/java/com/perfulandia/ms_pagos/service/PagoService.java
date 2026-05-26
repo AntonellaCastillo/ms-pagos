@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.perfulandia.ms_pagos.dto.PedidoDTO;
 import com.perfulandia.ms_pagos.model.EstadoPago;
 import com.perfulandia.ms_pagos.model.Pago;
 import com.perfulandia.ms_pagos.model.TipoPago;
@@ -28,46 +29,44 @@ public class PagoService {
     private static final String MS_PEDIDOS_URL = "http://localhost:8091/api/v1/pedidos";
     private static final String MS_NOTIFICACIONES_URL = "http://localhost:8089/api/v1/notificaciones";
 
-    // Listar todos los pagos
     public List<Pago> findAll() {
         log.info("Listando todos los pagos");
         return pagoRepository.findAll();
     }
 
-    // Buscar pago por id
     public Optional<Pago> findById(Long id) {
         log.info("Buscando pago con id: {}", id);
         return pagoRepository.findById(id);
     }
 
-    // Verificar pago por pedido
     public Optional<Pago> findByIdPedido(Long idPedido) {
         log.info("Verificando pago del pedido: {}", idPedido);
         return pagoRepository.findByIdPedido(idPedido);
     }
 
-    // Buscar pagos por estado
     public List<Pago> findByEstado(EstadoPago estado) {
         log.info("Buscando pagos con estado: {}", estado);
         return pagoRepository.findByEstado(estado);
     }
 
-    // Buscar pagos por tipo
     public List<Pago> findByTipo(TipoPago tipo) {
         log.info("Buscando pagos con tipo: {}", tipo);
         return pagoRepository.findByTipo(tipo);
     }
 
-    // Procesar pago — con resiliencia hacia MS Pedidos
+    // Procesar pago — igual que el profesor con ClienteDTO
     public Pago procesarPago(Pago pago) {
         log.info("Procesando pago para pedido: {}", pago.getIdPedido());
-        try {
-            // Verificar que el pedido existe en MS Pedidos
-            restTemplate.getForObject(MS_PEDIDOS_URL + "/" + pago.getIdPedido(), Object.class);
+
+        // Verificar que el pedido existe en MS Pedidos
+        String url = MS_PEDIDOS_URL + "/" + pago.getIdPedido();
+        PedidoDTO pedido = restTemplate.getForObject(url, PedidoDTO.class);
+
+        if (pedido != null) {
             pago.setEstado(EstadoPago.APROBADO);
-            log.info("Pedido {} verificado correctamente", pago.getIdPedido());
-        } catch (Exception e) {
-            log.warn("MS Pedidos no disponible: {}. Procesando en contingencia", e.getMessage());
+            log.info("Pedido {} verificado. Cliente: {}", pedido.getIdPedido(), pedido.getIdCliente());
+        } else {
+            log.warn("Pedido {} no encontrado. Procesando en contingencia", pago.getIdPedido());
             pago.setEstado(EstadoPago.PENDIENTE);
         }
 
