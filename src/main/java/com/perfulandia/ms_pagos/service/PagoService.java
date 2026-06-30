@@ -3,6 +3,7 @@ package com.perfulandia.ms_pagos.service;
 import com.perfulandia.ms_pagos.model.Pago;
 import com.perfulandia.ms_pagos.model.EstadoPago;
 import com.perfulandia.ms_pagos.repository.PagoRepository;
+import com.perfulandia.ms_pagos.exception.PagoRechazadoException;
 import com.perfulandia.ms_pagos.exception.RecursoNoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,19 +19,18 @@ public class PagoService
     private PagoRepository pagoRepository;
 
     // KAN-23: procesar un pago. Lo registra y lo deja CONFIRMADO o RECHAZADO.
+        // KAN-23: procesar un pago. Si el monto es válido lo CONFIRMA; si no, lanza 402.
     public Pago procesarPago(Pago pago) 
     {
-        pago.setFecha(LocalDateTime.now());
-        // Regla simple de procesamiento: si el monto es válido (>0), se confirma; si no, se rechaza.
-        if (pago.getMonto() != null && pago.getMonto().signum() > 0) 
+        // Regla: si el monto no es válido (<= 0 o nulo), el pago se rechaza con 402
+        if (pago.getMonto() == null || pago.getMonto().signum() <= 0) 
         {
-            pago.setEstado(EstadoPago.CONFIRMADO);
-        } else {
-            pago.setEstado(EstadoPago.RECHAZADO);
+            throw new PagoRechazadoException("El pago fue rechazado: monto inválido");
         }
+        pago.setFecha(LocalDateTime.now());
+        pago.setEstado(EstadoPago.CONFIRMADO);
         return pagoRepository.save(pago);
     }
-
     // Listar todos los pagos
     public List<Pago> listarPagos() 
     {

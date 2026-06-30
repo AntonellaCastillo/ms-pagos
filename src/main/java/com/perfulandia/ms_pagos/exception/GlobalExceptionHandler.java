@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.perfulandia.ms_pagos.exception.PagoRechazadoException;
 // CAPA EXCEPTION - manejo global de errores de TODOS los controllers.
 @RestControllerAdvice
 public class GlobalExceptionHandler 
@@ -70,4 +70,16 @@ public class GlobalExceptionHandler
         error.put("error", e.getMessage());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR); // 500
     }
+
+    // Pago rechazado (KAN-23) -> 402 Payment Required
+    @ExceptionHandler(PagoRechazadoException.class)
+    public ResponseEntity<Map<String, String>> manejarPagoRechazado(PagoRechazadoException e) 
+    {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", e.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.PAYMENT_REQUIRED); // 402
+    }
+
+
+
 }
