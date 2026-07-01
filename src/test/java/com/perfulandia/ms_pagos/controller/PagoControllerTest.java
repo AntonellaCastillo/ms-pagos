@@ -79,6 +79,28 @@ class PagoControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, respuesta.getStatusCode());
     }
 
+    // GET por pedido existente -> 200
+    @Test
+    void obtenerPorPedido_existe_devuelve200() {
+        Pago pago = new Pago();
+        pago.setIdPedido(1L);
+        when(pagoService.obtenerPagoPorPedido(1L)).thenReturn(Optional.of(pago));
+
+        ResponseEntity<Pago> respuesta = pagoController.obtenerPorPedido(1L);
+
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+    }
+
+    // GET por pedido inexistente -> 404
+    @Test
+    void obtenerPorPedido_noExiste_devuelve404() {
+        when(pagoService.obtenerPagoPorPedido(99L)).thenReturn(Optional.empty());
+
+        ResponseEntity<Pago> respuesta = pagoController.obtenerPorPedido(99L);
+
+        assertEquals(HttpStatus.NOT_FOUND, respuesta.getStatusCode());
+    }
+
     // PUT actualizar estado -> 200
     @Test
     void actualizarEstado_devuelve200() {

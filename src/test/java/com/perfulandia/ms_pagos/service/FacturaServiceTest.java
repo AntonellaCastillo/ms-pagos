@@ -43,6 +43,21 @@ class FacturaServiceTest {
         assertNotNull(resultado.getFechaEmision());
     }
 
+    // Cubre la rama donde el folio YA viene (el if es false)
+    @Test
+    void generarFactura_conFolioExistente_noGeneraNuevo() 
+    {
+        Factura factura = new Factura();
+        factura.setFolio("F-MANUAL");
+        factura.setEstado(EstadoFactura.ENVIADA);
+        when(facturaRepository.save(any(Factura.class))).thenAnswer(i -> i.getArgument(0));
+
+        Factura resultado = facturaService.generarFactura(factura);
+
+        assertEquals("F-MANUAL", resultado.getFolio());
+        assertEquals(EstadoFactura.ENVIADA, resultado.getEstado());
+    }
+
     @Test
     void listarFacturas_devuelveLista() 
     {
@@ -70,6 +85,18 @@ class FacturaServiceTest {
         when(facturaRepository.findById(99L)).thenReturn(Optional.empty());
         Optional<Factura> resultado = facturaService.obtenerFacturaPorId(99L);
         assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    void obtenerFacturaPorPago_existe_devuelveFactura() 
+    {
+        Factura factura = new Factura();
+        factura.setIdPago(1L);
+        when(facturaRepository.findByIdPago(1L)).thenReturn(Optional.of(factura));
+
+        Optional<Factura> resultado = facturaService.obtenerFacturaPorPago(1L);
+
+        assertTrue(resultado.isPresent());
     }
 
     @Test

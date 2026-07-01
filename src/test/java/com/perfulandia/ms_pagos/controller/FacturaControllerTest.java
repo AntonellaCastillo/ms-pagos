@@ -77,6 +77,28 @@ class FacturaControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, respuesta.getStatusCode());
     }
 
+    // GET por pago existente -> 200
+    @Test
+    void obtenerPorPago_existe_devuelve200() {
+        Factura factura = new Factura();
+        factura.setIdPago(1L);
+        when(facturaService.obtenerFacturaPorPago(1L)).thenReturn(Optional.of(factura));
+
+        ResponseEntity<Factura> respuesta = facturaController.obtenerPorPago(1L);
+
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+    }
+
+    // GET por pago inexistente -> 404
+    @Test
+    void obtenerPorPago_noExiste_devuelve404() {
+        when(facturaService.obtenerFacturaPorPago(99L)).thenReturn(Optional.empty());
+
+        ResponseEntity<Factura> respuesta = facturaController.obtenerPorPago(99L);
+
+        assertEquals(HttpStatus.NOT_FOUND, respuesta.getStatusCode());
+    }
+
     // PUT actualizar estado -> 200
     @Test
     void actualizarEstado_devuelve200() {

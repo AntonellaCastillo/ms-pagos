@@ -83,6 +83,18 @@ class PagoServiceTest
     }
 
     @Test
+    void obtenerPagoPorPedido_existe_devuelvePago() 
+    {
+        Pago pago = new Pago();
+        pago.setIdPedido(1L);
+        when(pagoRepository.findByIdPedido(1L)).thenReturn(Optional.of(pago));
+
+        Optional<Pago> resultado = pagoService.obtenerPagoPorPedido(1L);
+
+        assertTrue(resultado.isPresent());
+    }
+
+    @Test
     void actualizarEstado_existe_cambiaEstado() 
     {
         Pago pago = new Pago();
