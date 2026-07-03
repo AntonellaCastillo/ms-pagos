@@ -17,9 +17,11 @@ public class NotificacionClienteService {
 
     // KAN-24: al emitir una factura, avisa a Notificaciones para enviarla por correo.
     // try/catch = RESILIENCIA: si Notificaciones está caído, Pagos NO se cae.
-    public void notificarFacturaEmitida(Long idFactura, String correo) {
-        try {
-            String url = urlNotificaciones + "/api/v1/notificaciones/factura/" + idFactura;
+    public void notificarFacturaEmitida(Long idFactura, String correo) 
+    {
+        try
+         {
+            String url = urlNotificaciones + "/api/notificaciones/enviar";
             restTemplate.postForObject(url, correo, Void.class);
         } catch (Exception e) {
             System.out.println("No se pudo notificar la factura a MS Notificaciones: " + e.getMessage());
