@@ -12,7 +12,7 @@ public class NotificacionClienteService {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${ms.notificaciones.url:http://localhost:8090}")
+    @Value("${ms.notificaciones.url:http://localhost:8089}")
     private String urlNotificaciones;
 
     // KAN-24: al emitir una factura, avisa a Notificaciones para enviarla por correo.
